@@ -196,6 +196,12 @@ export default class ComposerEditor extends Component {
     this.appEvents.trigger(`${this.composerEventPrefix}:will-open`);
   }
 
+  /**
+   * Sets up the editor with the given text manipulation instance
+   *
+   * @param {TextManipulation} textManipulation The text manipulation instance
+   * @returns {(() => void)} destructor function
+   */
   @bind
   setupEditor(textManipulation) {
     this.textManipulation = textManipulation;
@@ -208,13 +214,14 @@ export default class ComposerEditor extends Component {
       this._throttledSyncEditorAndPreviewScroll
     );
 
-    if (!this.site.mobileView) {
-      this.composer.set("showPreview", this.textManipulation.allowPreview);
-    }
     this.composer.set("allowPreview", this.textManipulation.allowPreview);
 
-    // Focus on the body unless we have a title
-    if (!this.get("composer.model.canEditTitle")) {
+    if (
+      // Focus on the body unless we have a title
+      !this.get("composer.model.canEditTitle") ||
+      // Or focus is in the body (e.g. when the editor is destroyed)
+      document.activeElement.tagName === "BODY"
+    ) {
       this.textManipulation.putCursorAtEnd();
     }
 
