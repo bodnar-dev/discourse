@@ -9,6 +9,7 @@ import { BasePlugin } from "@uppy/core";
 import $ from "jquery";
 import { resolveAllShortUrls } from "pretty-text/upload-short-url";
 import { ajax } from "discourse/lib/ajax";
+import { setupComposerPosition } from "discourse/lib/composer/composer-position";
 import {
   fetchUnseenHashtagsInContext,
   linkSeenHashtagsInContext,
@@ -203,18 +204,19 @@ export default class ComposerEditor extends Component {
 
     const input = this.element.querySelector(".d-editor-input");
 
-    input?.addEventListener(
-      "scroll",
-      this._throttledSyncEditorAndPreviewScroll
-    );
+    input.addEventListener("scroll", this._throttledSyncEditorAndPreviewScroll);
 
     // Focus on the body unless we have a title
     if (!this.get("composer.model.canEditTitle")) {
       this.textManipulation.putCursorAtEnd();
     }
 
+    const destroyComposerPosition = setupComposerPosition(input);
+
     return () => {
-      input?.removeEventListener(
+      destroyComposerPosition();
+
+      input.removeEventListener(
         "scroll",
         this._throttledSyncEditorAndPreviewScroll
       );
